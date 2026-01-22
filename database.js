@@ -1,87 +1,151 @@
 // =============================================
-// КОНФИГУРАЦИЯ SUPABASE - ЗАМЕНИ НА СВОИ ЗНАЧЕНИЯ!
+// КОНФИГУРАЦИЯ SUPABASE - ЗАМЕНИ ЭТИ ЗНАЧЕНИЯ!
 // =============================================
 
-// ⚠️ ВАЖНО: Получи эти значения из Settings → API в Supabase
-const SUPABASE_URL = 'https://arcvzwxzohvbbwlmviit.supabase.co';  // Замени на свой Project URL
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyY3Z6d3h6b2h2YmJ3bG12aWl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNzI1MDMsImV4cCI6MjA4NDY0ODUwM30.01LWHc3VZmCkLZdS07iPw-Q3elf89jOYiphkW1A0zvI';           // Замени на свой anon/public key
+// ⚠️ ПОЛУЧИ ЭТИ ЗНАЧЕНИЯ ИЗ SUPABASE: Settings → API
+const SUPABASE_URL = 'https://arcvzwxzohvbbwlmviit.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyY3Z6d3h6b2h2YmJ3bG12aWl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNzI1MDMsImV4cCI6MjA4NDY0ODUwM30.01LWHc3VZmCkLZdS07iPw-Q3elf89jOYiphkW1A0zvI';
 
-console.log('🔧 Начинаю инициализацию Supabase...');
+console.log('=== НАСТРОЙКА SUPABASE ===');
 console.log('URL:', SUPABASE_URL);
-console.log('Ключ (первые 20 символов):', SUPABASE_KEY?.substring(0, 20) + '...');
+console.log('Ключ (первые 10 символов):', SUPABASE_KEY ? SUPABASE_KEY.substring(0, 10) + '...' : 'НЕ УСТАНОВЛЕН');
 
 // =============================================
-// ПРОСТАЯ ФУНКЦИЯ ДЛЯ ПРОВЕРКИ ПОДКЛЮЧЕНИЯ
+// УЛУЧШЕННЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С SUPABASE
 // =============================================
-async function checkSupabaseConnection() {
-    console.log('🔌 Проверяю подключение к Supabase...');
-    
-    try {
-        // Простейший запрос для проверки
-        const testUrl = `${SUPABASE_URL}/rest/v1/projects?select=id&limit=1`;
-        
-        const response = await fetch(testUrl, {
-            method: 'GET',
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`
-            }
-        });
-        
-        console.log('Статус ответа:', response.status);
-        console.log('Ответ:', response);
-        
-        if (response.ok) {
-            console.log('✅ Подключение к Supabase успешно!');
-            return true;
-        } else {
-            console.error('❌ Ошибка подключения. Статус:', response.status);
-            return false;
-        }
-    } catch (error) {
-        console.error('❌ Ошибка при проверке подключения:', error);
-        return false;
-    }
-}
 
-// =============================================
-// ОСНОВНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С БАЗОЙ
-// =============================================
-const database = {
-    // Проверка подключения (используется в начале)
+const Database = {
+    // Проверка подключения
     async testConnection() {
-        return await checkSupabaseConnection();
-    },
-    
-    // Получить все проекты
-    async getProjects() {
+        console.log('🔄 Проверка подключения к Supabase...');
+        
         try {
-            console.log('📥 Запрашиваю проекты...');
-            
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/projects?select=*&order=created_at.desc`, {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                method: 'GET',
                 headers: {
                     'apikey': SUPABASE_KEY,
                     'Authorization': `Bearer ${SUPABASE_KEY}`
                 }
             });
             
+            console.log('📡 Статус проверки подключения:', response.status);
+            
+            if (response.ok) {
+                console.log('✅ Подключение к Supabase успешно!');
+                return true;
+            } else {
+                console.error('❌ Ошибка подключения. Статус:', response.status);
+                const errorText = await response.text();
+                console.error('Детали ошибки:', errorText);
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ Сетевая ошибка при подключении:', error);
+            return false;
+        }
+    },
+    
+    // Получить все проекты (исправленная версия)
+    async getProjects() {
+        console.log('📥 Запрос проектов из базы данных...');
+        
+        try {
+            // URL для запроса проектов
+            const url = `${SUPABASE_URL}/rest/v1/projects?select=*&order=created_at.desc`;
+            
+            console.log('📡 Отправляю запрос на:', url);
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('📊 Статус ответа:', response.status);
+            console.log('📊 Заголовки ответа:', response.headers);
+            
             if (!response.ok) {
-                throw new Error(`Ошибка HTTP: ${response.status}`);
+                const errorText = await response.text();
+                console.error('❌ Ошибка HTTP при получении проектов:', response.status);
+                console.error('❌ Текст ошибки:', errorText);
+                
+                // Пробуем получить более простой запрос
+                console.log('🔄 Пробую альтернативный запрос...');
+                return await this.getProjectsSimple();
             }
             
             const data = await response.json();
-            console.log(`✅ Получено ${data.length} проектов`);
+            console.log(`✅ Успешно получено ${data.length} проектов`);
+            console.log('📋 Пример проекта:', data.length > 0 ? {
+                id: data[0].id,
+                title: data[0].title,
+                votes: data[0].votes
+            } : 'Нет проектов');
+            
             return data;
+            
         } catch (error) {
-            console.error('❌ Ошибка при получении проектов:', error);
+            console.error('❌ Критическая ошибка при получении проектов:', error);
+            
+            // Пробуем использовать localStorage как запасной вариант
+            const localProjects = localStorage.getItem('local_projects');
+            if (localProjects) {
+                console.log('🔄 Использую локальные данные из localStorage');
+                return JSON.parse(localProjects);
+            }
+            
+            return [];
+        }
+    },
+    
+    // Упрощенный запрос проектов
+    async getProjectsSimple() {
+        try {
+            const url = `${SUPABASE_URL}/rest/v1/projects`;
+            console.log('🔄 Пробую упрощенный запрос на:', url);
+            
+            const response = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_KEY
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log(`✅ Упрощенный запрос: получено ${data.length} проектов`);
+                return data;
+            }
+            
+            return [];
+        } catch (error) {
+            console.error('Ошибка упрощенного запроса:', error);
             return [];
         }
     },
     
     // Создать новый проект
     async createProject(projectData) {
+        console.log('➕ Создание нового проекта:', projectData.title);
+        
         try {
-            console.log('➕ Создаю проект:', projectData.title);
+            // Проверяем обязательные поля
+            if (!projectData.title || !projectData.description) {
+                throw new Error('Название и описание обязательны');
+            }
+            
+            const project = {
+                title: projectData.title,
+                description: projectData.description,
+                author: projectData.author || 'Аноним',
+                votes: 0,
+                status: 'active',
+                created_at: new Date().toISOString()
+            };
+            
+            console.log('📤 Отправляю данные:', project);
             
             const response = await fetch(`${SUPABASE_URL}/rest/v1/projects`, {
                 method: 'POST',
@@ -91,36 +155,50 @@ const database = {
                     'Content-Type': 'application/json',
                     'Prefer': 'return=representation'
                 },
-                body: JSON.stringify({
-                    title: projectData.title,
-                    description: projectData.description,
-                    author: projectData.author || 'Аноним',
-                    votes: 0,
-                    status: 'active',
-                    created_at: new Date().toISOString()
-                })
+                body: JSON.stringify(project)
             });
+            
+            console.log('📡 Статус создания проекта:', response.status);
             
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('❌ Ошибка создания проекта:', errorText);
-                throw new Error(`Ошибка: ${response.status}`);
+                
+                // Сохраняем локально если не удалось на сервер
+                this.saveProjectLocally(project);
+                throw new Error('Проект сохранен локально. Проблема с сервером.');
             }
             
             const data = await response.json();
-            console.log('✅ Проект создан, ID:', data[0]?.id);
+            console.log('✅ Проект создан на сервере:', data[0]);
             return data[0];
+            
         } catch (error) {
-            console.error('❌ Ошибка:', error);
+            console.error('❌ Ошибка при создании проекта:', error);
             throw error;
         }
     },
     
-    // Получить идеи для проекта
-    async getIdeas(projectId) {
+    // Сохранить проект локально (запасной вариант)
+    saveProjectLocally(project) {
         try {
+            const localProjects = JSON.parse(localStorage.getItem('local_projects') || '[]');
+            project.id = 'local_' + Date.now();
+            localProjects.push(project);
+            localStorage.setItem('local_projects', JSON.stringify(localProjects));
+            console.log('💾 Проект сохранен локально:', project);
+        } catch (e) {
+            console.error('Ошибка локального сохранения:', e);
+        }
+    },
+    
+    // Получить идеи проекта
+    async getProjectIdeas(projectId) {
+        try {
+            console.log(`📥 Запрос идей для проекта ${projectId}...`);
+            
             const response = await fetch(
-                `${SUPABASE_URL}/rest/v1/ideas?select=*&project_id=eq.${projectId}&order=votes.desc`, 
+                `${SUPABASE_URL}/rest/v1/ideas?project_id=eq.${projectId}&order=votes.desc`,
                 {
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -129,10 +207,16 @@ const database = {
                 }
             );
             
-            if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
-            return await response.json();
+            if (!response.ok) {
+                console.error('Ошибка получения идей:', response.status);
+                return [];
+            }
+            
+            const data = await response.json();
+            console.log(`✅ Получено ${data.length} идей для проекта ${projectId}`);
+            return data;
         } catch (error) {
-            console.error('Ошибка получения идей:', error);
+            console.error('Ошибка при получении идей:', error);
             return [];
         }
     },
@@ -140,6 +224,14 @@ const database = {
     // Добавить идею
     async addIdea(ideaData) {
         try {
+            const idea = {
+                project_id: ideaData.projectId,
+                content: ideaData.content,
+                author: ideaData.author || 'Аноним',
+                votes: 0,
+                created_at: new Date().toISOString()
+            };
+            
             const response = await fetch(`${SUPABASE_URL}/rest/v1/ideas`, {
                 method: 'POST',
                 headers: {
@@ -148,16 +240,11 @@ const database = {
                     'Content-Type': 'application/json',
                     'Prefer': 'return=representation'
                 },
-                body: JSON.stringify({
-                    project_id: ideaData.projectId,
-                    content: ideaData.content,
-                    author: ideaData.author || 'Аноним',
-                    votes: 0,
-                    created_at: new Date().toISOString()
-                })
+                body: JSON.stringify(idea)
             });
             
-            if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
+            if (!response.ok) throw new Error('Ошибка создания идеи');
+            
             const data = await response.json();
             return data[0];
         } catch (error) {
@@ -169,9 +256,9 @@ const database = {
     // Голосовать за проект
     async voteProject(projectId) {
         try {
-            // 1. Сначала получаем текущее количество голосов
-            const getResponse = await fetch(
-                `${SUPABASE_URL}/rest/v1/projects?select=votes&id=eq.${projectId}`,
+            // Сначала получаем проект
+            const response = await fetch(
+                `${SUPABASE_URL}/rest/v1/projects?id=eq.${projectId}&select=votes`,
                 {
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -180,12 +267,15 @@ const database = {
                 }
             );
             
-            if (!getResponse.ok) throw new Error('Не удалось получить проект');
+            if (!response.ok) throw new Error('Не удалось получить проект');
             
-            const projectData = await getResponse.json();
-            const currentVotes = projectData[0]?.votes || 0;
+            const data = await response.json();
+            if (!data || data.length === 0) throw new Error('Проект не найден');
             
-            // 2. Увеличиваем голоса
+            const currentVotes = data[0].votes || 0;
+            const newVotes = currentVotes + 1;
+            
+            // Обновляем голоса
             const updateResponse = await fetch(
                 `${SUPABASE_URL}/rest/v1/projects?id=eq.${projectId}`,
                 {
@@ -195,7 +285,7 @@ const database = {
                         'Authorization': `Bearer ${SUPABASE_KEY}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ votes: currentVotes + 1 })
+                    body: JSON.stringify({ votes: newVotes })
                 }
             );
             
@@ -209,8 +299,8 @@ const database = {
     // Голосовать за идею
     async voteIdea(ideaId) {
         try {
-            const getResponse = await fetch(
-                `${SUPABASE_URL}/rest/v1/ideas?select=votes&id=eq.${ideaId}`,
+            const response = await fetch(
+                `${SUPABASE_URL}/rest/v1/ideas?id=eq.${ideaId}&select=votes`,
                 {
                     headers: {
                         'apikey': SUPABASE_KEY,
@@ -219,10 +309,13 @@ const database = {
                 }
             );
             
-            if (!getResponse.ok) throw new Error('Не удалось получить идею');
+            if (!response.ok) throw new Error('Не удалось получить идею');
             
-            const ideaData = await getResponse.json();
-            const currentVotes = ideaData[0]?.votes || 0;
+            const data = await response.json();
+            if (!data || data.length === 0) throw new Error('Идея не найдена');
+            
+            const currentVotes = data[0].votes || 0;
+            const newVotes = currentVotes + 1;
             
             const updateResponse = await fetch(
                 `${SUPABASE_URL}/rest/v1/ideas?id=eq.${ideaId}`,
@@ -233,7 +326,7 @@ const database = {
                         'Authorization': `Bearer ${SUPABASE_KEY}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ votes: currentVotes + 1 })
+                    body: JSON.stringify({ votes: newVotes })
                 }
             );
             
@@ -247,6 +340,8 @@ const database = {
     // Получить статистику
     async getStats() {
         try {
+            console.log('📊 Запрос статистики...');
+            
             const [projectsRes, ideasRes] = await Promise.all([
                 fetch(`${SUPABASE_URL}/rest/v1/projects?select=id`, {
                     headers: {
@@ -254,7 +349,7 @@ const database = {
                         'Authorization': `Bearer ${SUPABASE_KEY}`
                     }
                 }),
-                fetch(`${SUPABASE_URL}/rest/v1/ideas?select=votes`, {
+                fetch(`${SUPABASE_URL}/rest/v1/ideas?select=id,votes`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
                         'Authorization': `Bearer ${SUPABASE_KEY}`
@@ -262,13 +357,27 @@ const database = {
                 })
             ]);
             
-            const projects = projectsRes.ok ? await projectsRes.json() : [];
-            const ideas = ideasRes.ok ? await ideasRes.json() : [];
+            let projectsCount = 0;
+            let ideasCount = 0;
+            let totalVotes = 0;
+            
+            if (projectsRes.ok) {
+                const projects = await projectsRes.json();
+                projectsCount = projects.length;
+            }
+            
+            if (ideasRes.ok) {
+                const ideas = await ideasRes.json();
+                ideasCount = ideas.length;
+                totalVotes = ideas.reduce((sum, idea) => sum + (idea.votes || 0), 0);
+            }
+            
+            console.log(`📊 Статистика: ${projectsCount} проектов, ${ideasCount} идей, ${totalVotes} голосов`);
             
             return {
-                projectsCount: projects.length,
-                ideasCount: ideas.length,
-                totalVotes: ideas.reduce((sum, idea) => sum + (idea.votes || 0), 0)
+                projectsCount,
+                ideasCount,
+                totalVotes
             };
         } catch (error) {
             console.error('Ошибка получения статистики:', error);
@@ -278,122 +387,140 @@ const database = {
 };
 
 // =============================================
-// ДЕЛАЕМ ФУНКЦИИ ДОСТУПНЫМИ ГЛОБАЛЬНО
+// ИНИЦИАЛИЗАЦИЯ И ПРОВЕРКА
 // =============================================
-window.database = database;
 
-// =============================================
-// АВТОМАТИЧЕСКАЯ ПРОВЕРКА ПРИ ЗАГРУЗКЕ
-// =============================================
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 Страница загружена, проверяю подключение...');
+// Делаем доступным глобально
+window.database = Database;
+
+// Автоматическая проверка при загрузке
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Инициализация базы данных...');
     
-    // Ждем 1 секунду, чтобы всё точно загрузилось
+    // Ждем немного для загрузки страницы
     setTimeout(async () => {
-        const isConnected = await database.testConnection();
+        console.log('🔍 Начинаю проверку подключения...');
+        
+        // Проверяем настройки
+        if (!SUPABASE_URL || SUPABASE_URL.includes('ВАШ') || 
+            !SUPABASE_KEY || SUPABASE_KEY.includes('ВАШ')) {
+            console.error('❌ НЕ НАСТРОЕНЫ КЛЮЧИ SUPABASE!');
+            showError('Не настроены ключи Supabase. Замените значения в database.js');
+            return;
+        }
+        
+        // Проверяем подключение
+        const isConnected = await Database.testConnection();
         
         if (isConnected) {
-            console.log('🎉 База данных работает! Загружаю данные...');
-            showNotification('✅ База данных подключена', 'success');
+            console.log('🎉 База данных готова к работе!');
+            showSuccess('База данных подключена');
             
-            // Загружаем начальные данные
-            setTimeout(() => {
-                loadInitialData();
-            }, 1000);
+            // Тестовая загрузка проектов
+            console.log('🧪 Тестовая загрузка проектов...');
+            try {
+                const testProjects = await Database.getProjects();
+                console.log('🧪 Тест успешен! Проектов:', testProjects.length);
+                
+                // Если нет проектов, предлагаем создать
+                if (testProjects.length === 0) {
+                    console.log('ℹ️ Проектов нет. Можно создать первый!');
+                }
+            } catch (testError) {
+                console.error('🧪 Тестовая загрузка не удалась:', testError);
+            }
             
         } else {
             console.error('💥 Не удалось подключиться к базе данных');
-            showNotification('❌ Ошибка подключения к базе данных. Проверьте консоль (F12)', 'error');
-            
-            // Показываем подробную ошибку
-            setTimeout(() => {
-                alert(
-                    'ОШИБКА ПОДКЛЮЧЕНИЯ К БАЗЕ ДАННЫХ\n\n' +
-                    'Возможные причины:\n' +
-                    '1. Неправильный URL или ключ Supabase\n' +
-                    '2. Таблицы не созданы в Supabase\n' +
-                    '3. Проблемы с интернет-соединением\n\n' +
-                    'Откройте консоль (F12 → Console) для подробной информации.'
-                );
-            }, 500);
+            showError('Ошибка подключения. Проверьте настройки Supabase и консоль (F12).');
         }
-    }, 1000);
+    }, 500);
 });
 
-// =============================================
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-// =============================================
+// Функции для отображения уведомлений
+function showSuccess(message) {
+    showNotification(message, 'success');
+}
+
+function showError(message) {
+    showNotification(message, 'error');
+}
+
 function showNotification(message, type) {
-    // Удаляем старое уведомление, если есть
-    const oldNotification = document.getElementById('connection-notification');
-    if (oldNotification) oldNotification.remove();
+    // Создаем стили для уведомлений
+    const styleId = 'notification-styles';
+    if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            .supabase-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: notificationSlideIn 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 400px;
+            }
+            @keyframes notificationSlideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes notificationSlideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            .notification-success {
+                background: #4CAF50;
+                border-left: 4px solid #2E7D32;
+            }
+            .notification-error {
+                background: #f44336;
+                border-left: 4px solid #c62828;
+            }
+            .notification-info {
+                background: #2196F3;
+                border-left: 4px solid #1565C0;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Удаляем старое уведомление
+    const oldNotification = document.querySelector('.supabase-notification');
+    if (oldNotification) {
+        oldNotification.style.animation = 'notificationSlideOut 0.3s ease';
+        setTimeout(() => oldNotification.remove(), 300);
+    }
     
     // Создаем новое уведомление
-    const notification = document.createElement('div');
-    notification.id = 'connection-notification';
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: bold;
-        z-index: 10000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        animation: slideIn 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    `;
-    
-    notification.style.background = type === 'success' ? '#4CAF50' : '#f44336';
-    
-    notification.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
-        <span>${message}</span>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Добавляем анимацию
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Убираем через 5 секунд
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 5000);
-}
-
-async function loadInitialData() {
-    try {
-        console.log('📊 Загружаю начальные данные...');
-        const stats = await database.getStats();
+        const notification = document.createElement('div');
+        notification.className = `supabase-notification notification-${type}`;
         
-        // Обновляем статистику на странице
-        document.getElementById('projects-count').textContent = stats.projectsCount;
-        document.getElementById('ideas-count').textContent = stats.ideasCount;
-        document.getElementById('votes-count').textContent = stats.totalVotes;
+        const icon = type === 'success' ? 'fa-check-circle' : 
+                    type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
         
-        console.log('📊 Статистика загружена:', stats);
-    } catch (error) {
-        console.error('Ошибка загрузки начальных данных:', error);
-    }
-}
-
-// Экспортируем для использования в других файлах
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = database;
+        notification.innerHTML = `
+            <i class="fas ${icon}"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Автоматическое скрытие
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.animation = 'notificationSlideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 5000);
+    }, oldNotification ? 350 : 0);
 }
