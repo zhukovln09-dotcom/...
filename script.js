@@ -5,6 +5,52 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Инициализация
     init();
+
+    async function checkDatabaseConnection() {
+    const connectionStatus = document.createElement('div');
+    connectionStatus.id = 'connection-status';
+    connectionStatus.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        z-index: 1000;
+        font-weight: bold;
+        display: none;
+    `;
+    document.body.appendChild(connectionStatus);
+
+    const isConnected = await window.database.checkConnection();
+    
+    if (isConnected) {
+        connectionStatus.textContent = '✓ База данных подключена';
+        connectionStatus.style.background = '#d4edda';
+        connectionStatus.style.color = '#155724';
+        connectionStatus.style.border = '1px solid #c3e6cb';
+        connectionStatus.style.display = 'block';
+        
+        // Скрываем через 3 секунды
+        setTimeout(() => {
+            connectionStatus.style.display = 'none';
+        }, 3000);
+        
+        return true;
+    } else {
+        connectionStatus.textContent = '✗ Нет подключения к базе данных';
+        connectionStatus.style.background = '#f8d7da';
+        connectionStatus.style.color = '#721c24';
+        connectionStatus.style.border = '1px solid #f5c6cb';
+        connectionStatus.style.display = 'block';
+        
+        // Показываем сообщение пользователю
+        setTimeout(() => {
+            alert('Внимание: Не удалось подключиться к базе данных. Некоторые функции могут не работать. Проверьте подключение к интернету и настройки Supabase.');
+        }, 1000);
+        
+        return false;
+    }
+}
     
     // Основная функция инициализации
     function init() {
