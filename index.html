@@ -4,182 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Школьный Краудсорсинг</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        header { background: #4b6cb7; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .nav-btn { padding: 10px 20px; background: white; border: none; border-radius: 5px; cursor: pointer; }
+        .nav-btn.active { background: #4b6cb7; color: white; }
+        .page { display: none; background: white; padding: 20px; border-radius: 10px; }
+        .page.active { display: block; }
+        .project-card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        .error { color: red; padding: 20px; }
+        .success { color: green; padding: 20px; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 20px; background: #4b6cb7; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #3a56a4; }
+    </style>
 </head>
 <body>
-    <!-- Шапка сайта -->
-    <header>
-        <div class="container">
-            <h1><i class="fas fa-lightbulb"></i> Школьный Краудсорсинг</h1>
-            <p>Предлагайте идеи, голосуйте за лучшие, меняйте школу к лучшему!</p>
-            <div class="auth-buttons">
-                <button id="loginBtn" class="btn-secondary">
-                    <i class="fas fa-sign-in-alt"></i> Войти
-                </button>
-                <button id="logoutBtn" class="btn-secondary" style="display: none;">
-                    <i class="fas fa-sign-out-alt"></i> Выйти
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Навигация между страницами -->
-    <nav>
-        <div class="container">
-            <button class="nav-btn active" data-page="home">
-                <i class="fas fa-home"></i> Главная
-            </button>
-            <button class="nav-btn" data-page="projects">
-                <i class="fas fa-project-diagram"></i> Проекты
-            </button>
-            <button class="nav-btn" data-page="submit">
-                <i class="fas fa-plus-circle"></i> Предложить
-            </button>
-            <button class="nav-btn" data-page="leaderboard">
-                <i class="fas fa-trophy"></i> Рейтинг
-            </button>
-        </div>
-    </nav>
-
-    <!-- Основной контент (меняется при переключении страниц) -->
-    <main class="container">
-        <!-- Страница 1: Главная -->
-        <section id="home-page" class="page active">
-            <div class="welcome-section">
-                <h2><i class="fas fa-hands-helping"></i> Добро пожаловать!</h2>
-                <p>Это платформа для совместного создания идей по улучшению нашей школы.</p>
-                
-                <div class="stats">
-                    <div class="stat-card">
-                        <i class="fas fa-project-diagram"></i>
-                        <h3 id="projects-count">0</h3>
-                        <p>Активных проектов</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-lightbulb"></i>
-                        <h3 id="ideas-count">0</h3>
-                        <p>Предложенных идей</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-users"></i>
-                        <h3 id="votes-count">0</h3>
-                        <p>Всего голосов</p>
-                    </div>
+    <div class="container">
+        <header>
+            <h1>Школьный Краудсорсинг</h1>
+            <p>Предлагайте идеи, голосуйте за лучшие!</p>
+        </header>
+        
+        <nav>
+            <button class="nav-btn active" data-page="home">Главная</button>
+            <button class="nav-btn" data-page="projects">Проекты</button>
+            <button class="nav-btn" data-page="submit">Предложить</button>
+        </nav>
+        
+        <main>
+            <section id="home-page" class="page active">
+                <h2>Добро пожаловать!</h2>
+                <p>Здесь можно предлагать идеи по улучшению школы.</p>
+                <div id="stats">
+                    <p>Проектов: <span id="projects-count">0</span></p>
+                    <p>Идей: <span id="ideas-count">0</span></p>
                 </div>
-                
-                <div class="how-to">
-                    <h3><i class="fas fa-question-circle"></i> Как это работает?</h3>
-                    <div class="steps">
-                        <div class="step">
-                            <div class="step-number">1</div>
-                            <h4>Предложи проект</h4>
-                            <p>Опиши, что можно улучшить в школе</p>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">2</div>
-                            <h4>Собери идеи</h4>
-                            <p>Другие пользователи предложат решения</p>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">3</div>
-                            <h4>Голосуй за лучшее</h4>
-                            <p>Выбери самые полезные предложения</p>
-                        </div>
-                    </div>
+            </section>
+            
+            <section id="projects-page" class="page">
+                <h2>Все проекты</h2>
+                <div id="projects-list">
+                    <div class="loading">Загрузка проектов...</div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Страница 2: Проекты -->
-        <section id="projects-page" class="page">
-            <h2><i class="fas fa-list"></i> Все проекты</h2>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">Все</button>
-                <button class="filter-btn" data-filter="active">Активные</button>
-                <button class="filter-btn" data-filter="popular">Популярные</button>
-            </div>
-            <div id="projects-list" class="projects-container">
-                <!-- Проекты загружаются через JavaScript -->
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i> Загрузка проектов...
-                </div>
-            </div>
-        </section>
-
-        <!-- Страница 3: Предложить проект -->
-        <section id="submit-page" class="page">
-            <h2><i class="fas fa-plus-circle"></i> Предложить новый проект</h2>
-            <div class="submit-form">
-                <div class="form-group">
-                    <label for="project-title"><i class="fas fa-heading"></i> Название проекта</label>
-                    <input type="text" id="project-title" placeholder="Например: Улучшение школьной столовой">
-                </div>
-                
-                <div class="form-group">
-                    <label for="project-author"><i class="fas fa-user"></i> Ваше имя (по желанию)</label>
-                    <input type="text" id="project-author" placeholder="Иван Иванов">
-                </div>
-                
-                <div class="form-group">
-                    <label for="project-description">
-                        <i class="fas fa-align-left"></i> Описание проекта
-                    </label>
-                    <textarea id="project-description" rows="6" 
-                              placeholder="Опишите подробно, что вы хотите улучшить и почему это важно..."></textarea>
-                </div>
-                
-                <button id="submit-project-btn" class="btn-primary">
-                    <i class="fas fa-paper-plane"></i> Опубликовать проект
-                </button>
-                
-                <div id="submit-message" class="message" style="display: none;"></div>
-            </div>
-        </section>
-
-        <!-- Страница 4: Рейтинг -->
-        <section id="leaderboard-page" class="page">
-            <h2><i class="fas fa-trophy"></i> Рейтинг идей</h2>
-            <div id="leaderboard-list">
-                <!-- Рейтинг загружается через JavaScript -->
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i> Загрузка рейтинга...
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Модальное окно для деталей проекта -->
-    <div id="project-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div id="modal-project-details"></div>
-            <div id="modal-ideas-list"></div>
-            <div class="add-idea-section">
-                <h3><i class="fas fa-lightbulb"></i> Предложить идею</h3>
-                <textarea id="new-idea-content" placeholder="Ваше предложение..." rows="3"></textarea>
-                <input type="text" id="new-idea-author" placeholder="Ваше имя (по желанию)">
-                <button id="submit-idea-btn" class="btn-primary">
-                    <i class="fas fa-plus"></i> Добавить идею
-                </button>
-            </div>
-        </div>
+            </section>
+            
+            <section id="submit-page" class="page">
+                <h2>Предложить проект</h2>
+                <input type="text" id="project-title" placeholder="Название проекта">
+                <textarea id="project-description" placeholder="Описание" rows="4"></textarea>
+                <input type="text" id="project-author" placeholder="Ваше имя (по желанию)">
+                <button id="submit-btn">Опубликовать</button>
+                <div id="message"></div>
+            </section>
+        </main>
     </div>
 
-    <!-- Подвал сайта -->
-    <footer>
-        <div class="container">
-            <p class="footer-info">
-                Сделано учениками для учеников 
-                <i class="fas fa-heart" style="color: #ff4757;"></i>
-            </p>
-        </div>
-    </footer>
-
-    <!-- Подключаем JavaScript файлы -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="database.js"></script>
-    <script src="auth.js"></script>
-    <script src="script.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
