@@ -1,7 +1,7 @@
 // Конфигурация Supabase - ЗАМЕНИ НА СВОИ ЗНАЧЕНИЯ
 const SUPABASE_CONFIG = {
     url: 'https://arcvzwxzohvbbwlmviit.supabase.co',
-    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyY3Z6d3h6b2h2YmJ3bG12aWl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwNzI1MDMsImV4cCI6MjA4NDY0ODUwM30.01LWHc3VZmCkLZdS07iPw-Q3elf89jOYiphkW1A0zvI'
+    key: 'sb_publishable_RPZBZKwZ_0IfYoYPHV3Dqg_j1q6e2SD'
 };
 
 // Проверяем, доступен ли Supabase
